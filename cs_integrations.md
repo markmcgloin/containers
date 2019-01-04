@@ -646,15 +646,29 @@ Before you begin: [Log in to your account. Target the appropriate region and, if
     kubectl apply -f https://raw.githubusercontent.com/IBM-Cloud/kube-samples/master/rbac/serviceaccount-tiller.yaml
     ```
     {: pre}
+    
+3. Create a certificate for Tiler and the Client to use in order to enforce TLS to the Tiller component. Example instructions for creating the certs are covered here <a href="https://github.com/helm/helm/blob/master/docs/tiller_ssl.md" target="_blank">Using SSL Between Helm and Tiller <img src="../icons/launch-glyph.svg" alt="External link icon"></a>.
 
-3. Initialize Helm and install `tiller` with the service account that you created.
+
+4. Initialize Helm and install `tiller` with the service account that you created.
 
     ```
-    helm init --service-account tiller
+    helm init --tiller-tls --tiller-tls-verify --tiller-tls-cert=cert.pem --tiller-tls-key=key.pem --tls-ca-cert=ca.pem --service-account=accountname
+
     ```
     {: pre}
 
-4. Verify that the `tiller-deploy` pod has a **Status** of `Running` in your cluster.
+Relevant flags to helm init:
+* --tiller-tls: Enable TLS on Tiller.
+* --tiller-tls-verify: Turn on Tiller's TLS with verification mode enabled (you can disable verification mode, but we suggest not doing so).
+*	--tiller-tls-cert: Tiller's certificate.
+*	--tiller-tls-key: Tiller's cryptographic key, which it will not share.
+*	--tiller-ca-cert: The CA for Tiller that can be used to verify client certificates.
+* --service-account: Service account created in previous step
+
+  
+
+5. Verify that the `tiller-deploy` pod has a **Status** of `Running` in your cluster.
 
     ```
     kubectl get pods -n kube-system -l app=helm
@@ -669,7 +683,7 @@ Before you begin: [Log in to your account. Target the appropriate region and, if
     ```
     {: screen}
 
-5. Add the {{site.data.keyword.Bluemix_notm}} Helm repositories to your Helm instance.
+6. Add the {{site.data.keyword.Bluemix_notm}} Helm repositories to your Helm instance.
 
     ```
     helm repo add ibm https://registry.bluemix.net/helm/ibm
@@ -681,24 +695,24 @@ Before you begin: [Log in to your account. Target the appropriate region and, if
     ```
     {: pre}
 
-6. List the Helm charts that are currently available in the {{site.data.keyword.Bluemix_notm}} repositories.
+7. List the Helm charts that are currently available in the {{site.data.keyword.Bluemix_notm}} repositories.
 
     ```
-    helm search ibm
+    helm search ibm --tls --tls-ca-cert ca.cert.pem --tls-cert helm.cert.pem --tls-key helm.key.pem
     ```
     {: pre}
 
     ```
-    helm search ibm-charts
+    helm search ibm-charts --tls --tls-ca-cert ca.cert.pem --tls-cert helm.cert.pem --tls-key helm.key.pem
     ```
     {: pre}
 
-7. To learn more about a chart, list its settings and default values.
+8. To learn more about a chart, list its settings and default values.
 
     For example, to view the settings, documentation, and default values for the strongSwan IPSec VPN service Helm chart:
 
     ```
-    helm inspect ibm/strongswan
+    helm inspect ibm/strongswan --tls --tls-ca-cert ca.cert.pem --tls-cert helm.cert.pem --tls-key helm.key.pem
     ```
     {: pre}
 
